@@ -18,47 +18,87 @@ permalink: /docs/getting-started.html
 		<li>A Mayfly account (free during beta — <a href="https://join.slack.com/t/mayfly-corp/shared_invite/zt-3w2xcd6us-UKdVBMNkY~vv2bhSrLRSSA" target="_blank" rel="noopener">join via Slack</a>)</li>
 	</ul>
 
-	<h2>Installation</h2>
-	<p>Run the installer with a single command. It will set up the <code>mayfly</code> CLI and register your SSH key with your account.</p>
+	<h2>Setup</h2>
+
+	<p>Sign up is via a private beta over <a href="/join">Slack</a>.</p>
+	<p>Once you join, Mike should be in touch - he'll need the following details to set you up with an account:</p>
+
+	<ul>
+		<li><strong>Account name</strong> - generally your company name - this will be part of the preview URLs</li>
+		<li><strong>SSH Keys</strong> - The public SSH keys of those using your account, this can be as many as you need but will generally include your CI server</li>
+	</ul>
+
+	<p>Once the account is set up, you can run the following to confirm everything works</p>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this, 'ssh deploy@mayfly.live whoami')">Copy</button></div>
+		<pre><code><span class="c-prompt">$</span> ssh deploy@mayfly.live whoami</code></pre>
+	</div>
+
+	<h2>Deploying your first environment</h2>
+	<p>Navigate to the root of any ddev-powered project and run:</p>
 
 	<div class="code-block">
 		<div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this, 'bash &lt;(curl -fsSL mayfly.live/preview.sh)')">Copy</button></div>
 		<pre><code><span class="c-prompt">$</span> bash &lt;(curl -fsSL mayfly.live/preview.sh)</code></pre>
 	</div>
 
-	<p>The installer will prompt you to paste your public SSH key if one has not been registered yet.</p>
-
-	<h2>Deploying your first environment</h2>
-	<p>Navigate to the root of any ddev-powered project and run:</p>
-
-	<div class="code-block">
-		<div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this, 'preview-deploy')">Copy</button></div>
-		<pre><code><span class="c-prompt">$</span> preview-deploy</code></pre>
-	</div>
-
 	<p>Mayfly will spin up the environment under your account subdomain and print a shareable URL.</p>
 
 	<div class="callout callout-tip">
-		<strong>Tip:</strong> Each environment is named after your project and branch automatically. Run the same command on a different branch and you'll get a second, independent environment — both live at the same time.
+		<strong>Tip:</strong> Each environment is named after your ddev project name and a hash of your current branch. Run the same command on a different branch and you'll get a second, independent environment — both live at the same time.
+	</div>
+
+	<h2>Accessing your container</h2>
+
+	<p>Mayfly allows SSH access to the individual DDEV containers should you need to <code>rsync</code> assets or alter code on the fly</p>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this, 'ssh -t deploy@deploy.mayfly.live {SLUG}')">Copy</button></div>
+		<pre><code><span class="c-prompt">$</span> ssh -t deploy@deploy.mayfly.live {SLUG}</code></pre>
+	</div>
+
+	<p>Where <code>{SLUG}</code> is the Mayfly's unique preview code.</p>
+
+	<h2>Importing a database</h2>
+
+	<p>If you wish to import a database, the `preview.sh` file allows standard input for passing your SQL file.</p>
+	<p>You can either use <code>stdin</code> or pass a <code>DB_FILE</code> variable</p>
+
+	<h3>Using <code>stdin</code></h3>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this, 'cat dump.sql | bash <(curl -fsSL mayfly.live/preview.sh) import-db')">Copy</button></div>
+		<pre><code><span class="c-prompt">$</span> cat dump.sql | bash <(curl -fsSL mayfly.live/preview.sh) import-db</code></pre>
+	</div>
+
+	<h3>Using command-line variable</h3>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this, 'DB_FILE=dump.sql.gz bash <(curl -fsSL mayfly.live/preview.sh) import-db')">Copy</button></div>
+		<pre><code><span class="c-prompt">$</span> DB_FILE=dump.sql.gz bash <(curl -fsSL mayfly.live/preview.sh) import-db</code></pre>
+	</div>
+
+	<div class="callout callout-tip">
+		<strong>Tip:</strong> The database file can be <code>.sql</code> or <code>sql.gz</code>
 	</div>
 
 	<h2>Tearing down</h2>
-	<p>Environments are ephemeral by design, but you can destroy one manually:</p>
-
+	<p>To delete/remove an environment (to free up available slots), you can run the following</p>
 	<div class="code-block">
-		<div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this, 'preview-destroy')">Copy</button></div>
-		<pre><code><span class="c-prompt">$</span> preview-destroy</code></pre>
+		<div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this, 'bash <(curl -fsSL mayfly.live/preview.sh) delete')">Copy</button></div>
+		<pre><code><span class="c-prompt">$</span> bash <(curl -fsSL mayfly.live/preview.sh) delete</code></pre>
 	</div>
 
-	<h2>Next steps</h2>
+	{# <h2>Next steps</h2>
 	<ul>
 		<li><a href="configuration.html">Customise your ddev environment</a></li>
 		<li><a href="ci-integration.html">Set up GitLab CI or GitHub Actions</a></li>
-	</ul>
+	</ul> #}
 
 </div>
 
-<div class="page-nav">
+{# <div class="page-nav">
 	<span></span>
 	<a href="configuration.html" class="page-nav-next">Configuration →</a>
-</div>
+</div> #}
