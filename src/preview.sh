@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------------
 # preview.sh — run mayfly CI scripts locally
 #
-# Run from your TYPO3 project root (the directory containing .ddev/).
+# Run from your project root (the directory containing .ddev/).
 #
 # Usage:
 #   preview.sh [deploy|delete|stop|import-db|export-db]
