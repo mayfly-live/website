@@ -88,12 +88,10 @@ if [ -z "$SSH_KEY_FILE" ]; then
   exit 1
 fi
 
-echo "[preview] Command:  ${COMMAND}"
-echo "[preview] Project:  ${CI_PROJECT_NAME}"
-echo "[preview] Branch:   ${CI_COMMIT_REF_NAME}"
-echo "[preview] Server:   ${PREVIEW_SERVER_USER}@${PREVIEW_SERVER_HOST}"
-echo "[preview] Domain:   ${PREVIEW_DOMAIN}"
-echo "[preview] SSH key:  ${SSH_KEY_FILE}"
+echo "[preview] Command: ${COMMAND}"
+echo "[preview] Project: ${CI_PROJECT_NAME}"
+echo "[preview] Branch: ${CI_COMMIT_REF_NAME}"
+echo "[preview] SSH key: ${SSH_KEY_FILE}"
 
 # ── import-db: normalise input to a plain-SQL file in the workspace ──────────
 IMPORT_TMP=""
