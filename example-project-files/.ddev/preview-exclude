@@ -1,0 +1,10 @@
+# Rsync exclude patterns for preview deploys — one per line, gitignore-style.
+# .git/ is always excluded regardless of what is listed here.
+#
+# Common candidates:
+#   node_modules/
+#   vendor/
+#   var/
+#   fileadmin/
+
+node_modules/

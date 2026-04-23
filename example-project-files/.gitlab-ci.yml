@@ -1,0 +1,125 @@
+stages:
+  - build
+  - deploy
+  - database
+  - cleanup
+
+# ---------------------------------------------------------------------------
+# Required CI/CD variables (GitLab → Settings → CI/CD → Variables):
+#
+#   For deploy & stop:
+#     PREVIEW_SERVER_USER   SSH user on the preview server (e.g. deploy)
+#     PREVIEW_DOMAIN        Domain for preview URLs (e.g. mayfly.live)
+#                           Each user gets a wildcard: *.{username}.{PREVIEW_DOMAIN}
+#     SSH_PRIVATE_KEY       The deploying user's private key (file, protected).
+#                           The server identifies the user from this key — no
+#                           PREVIEW_USER variable needed. The user's registered
+#                           SSH keys are automatically injected into containers.
+#
+#   Optional:
+#     PREVIEW_SERVER_HOST   Override the preview server hostname (default: deploy.mayfly.live)
+#
+#   For import-db (additional):
+#     DB_FILE               Path to a .sql or .sql.gz dump file.
+#                           Use a file-type CI/CD variable, or add your own
+#                           dump job that produces it as an artifact.
+#
+# Optional CI/CD variables:
+#     TYPO3_SITE_IDENTIFIER  TYPO3 site folder name (default: auto-detected).
+#                            Set explicitly if you have multiple sites or if
+#                            auto-detection fails.
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# build:preview
+#
+# Installs dependencies and compiles assets on the CI runner.
+# Adjust commands to match your project's toolchain.
+# ---------------------------------------------------------------------------
+build:preview:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - composer install --no-dev --optimize-autoloader
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - vendor/
+      - public/typo3conf/ext/*/Resources/Public/
+      - public/assets/
+    exclude:
+      - "**/*.map"
+      - "**/node_modules/"
+    expire_in: 1 day
+
+# ---------------------------------------------------------------------------
+# deploy:preview
+#
+# Triggered automatically on every push to the MR branch.
+# Rsyncs built assets to the preview server, then SSHes in to configure
+# DDEV and patch the TYPO3 base URL.
+#
+# The server identifies the user from SSH_PRIVATE_KEY and scopes the
+# preview to their subdomain namespace ({slug}.{user}.{PREVIEW_DOMAIN}).
+# The user's own SSH keys are automatically injected into the container.
+#
+# Never touches the database — the DB volume is preserved across deploys
+# so any CMS changes made in the preview environment survive code pushes.
+# ---------------------------------------------------------------------------
+deploy:preview:
+  stage: deploy
+  needs: [build:preview]
+  image: ghcr.io/mikestreety/mayfly:latest
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  environment:
+    name: preview/mr-$CI_MERGE_REQUEST_IID
+    url: $PREVIEW_URL
+    on_stop: stop:preview
+  script:
+    - preview-deploy
+  artifacts:
+    reports:
+      dotenv: .ddev/deploy.env
+
+# ---------------------------------------------------------------------------
+# import-db:preview
+#
+# Manual trigger only. Pipes a developer-supplied SQL dump to the preview
+# server and imports it. No production server credentials are required —
+# obtain the dump independently and provide it via DB_FILE.
+#
+# After import, .ddev/preview-init.sql is run automatically to sanitise PII.
+# ---------------------------------------------------------------------------
+import-db:preview:
+  stage: database
+  needs: [deploy:preview]
+  image: ghcr.io/mikestreety/mayfly:latest
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+  allow_failure: true
+  script:
+    - preview-import-db
+
+# ---------------------------------------------------------------------------
+# stop:preview
+#
+# Manual trigger to tear down the environment (or fires automatically when
+# the MR is closed, via GitLab environment lifecycle).
+# ---------------------------------------------------------------------------
+stop:preview:
+  stage: cleanup
+  needs: []
+  image: ghcr.io/mikestreety/mayfly:latest
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+  environment:
+    name: preview/mr-$CI_MERGE_REQUEST_IID
+    action: stop
+  allow_failure: true
+  script:
+    - preview-delete
