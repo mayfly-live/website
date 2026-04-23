@@ -25,9 +25,7 @@ stages:
 #                           dump job that produces it as an artifact.
 #
 # Optional CI/CD variables:
-#     TYPO3_SITE_IDENTIFIER  TYPO3 site folder name (default: auto-detected).
-#                            Set explicitly if you have multiple sites or if
-#                            auto-detection fails.
+
 # ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
