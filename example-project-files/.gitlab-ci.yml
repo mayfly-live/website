@@ -68,7 +68,7 @@ build:preview:
 deploy:preview:
   stage: deploy
   needs: [build:preview]
-  image: ghcr.io/mikestreety/mayfly:latest
+  image: ghcr.io/mayfly-live/mayfly:latest
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   environment:
@@ -89,7 +89,7 @@ deploy:preview:
 import-db:preview:
   stage: database
   needs: [deploy:preview]
-  image: ghcr.io/mikestreety/mayfly:latest
+  image: ghcr.io/mayfly-live/mayfly:latest
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: manual
@@ -106,7 +106,7 @@ import-db:preview:
 stop:preview:
   stage: cleanup
   needs: []
-  image: ghcr.io/mikestreety/mayfly:latest
+  image: ghcr.io/mayfly-live/mayfly:latest
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: manual
