@@ -25,7 +25,7 @@
 #   - SSH key         first of ~/.ssh/id_ed25519, ~/.ssh/id_ecdsa, ~/.ssh/id_rsa
 #
 # Optional overrides (env vars):
-#   PREVIEW_SERVER_HOST   default: deploy.mayfly.live
+#   PREVIEW_SERVER_HOST   default: host.mayfly.live
 #   PREVIEW_SERVER_USER   default: deploy
 #   PREVIEW_DOMAIN        default: mayfly.live
 #   SSH_KEY_FILE          path to private key (overrides auto-detect)
@@ -51,7 +51,7 @@ case "$COMMAND" in
 esac
 
 # ── server config ────────────────────────────────────────────────────────────
-PREVIEW_SERVER_HOST=${PREVIEW_SERVER_HOST:-deploy.mayfly.live}
+PREVIEW_SERVER_HOST=${PREVIEW_SERVER_HOST:-host.mayfly.live}
 PREVIEW_SERVER_USER=${PREVIEW_SERVER_USER:-deploy}
 PREVIEW_DOMAIN=${PREVIEW_DOMAIN:-mayfly.live}
 

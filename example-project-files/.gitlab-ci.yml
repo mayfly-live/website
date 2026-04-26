@@ -16,7 +16,7 @@ stages:
 #                           injected into containers.
 #
 #   Optional:
-#     PREVIEW_SERVER_HOST   Override the preview server hostname (default: deploy.mayfly.live)
+#     PREVIEW_SERVER_HOST   Override the preview server hostname (default: host.mayfly.live)
 #
 #   For import-db (additional):
 #     DB_FILE               Path to a .sql or .sql.gz dump file.
