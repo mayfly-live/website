@@ -35,7 +35,7 @@
 set -euo pipefail
 
 COMMAND=${1:-deploy}
-IMAGE="ghcr.io/mikestreety/mayfly:latest"
+IMAGE="ghcr.io/mayfly-live/mayfly:latest"
 
 # ── validate and normalise command ───────────────────────────────────────────
 case "$COMMAND" in
