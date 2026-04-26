@@ -88,6 +88,22 @@ if [ -z "$SSH_KEY_FILE" ]; then
   exit 1
 fi
 
+# If the key is passphrase-protected, decrypt it to a temp file so the Docker
+# container can load it non-interactively (ssh-add can't prompt through a pipe).
+SSH_KEY_TMP=""
+if ! ssh-keygen -y -P "" -f "$SSH_KEY_FILE" &>/dev/null; then
+  echo "[preview] Key is passphrase-protected — enter passphrase to decrypt for this session"
+  SSH_KEY_TMP=$(mktemp)
+  chmod 600 "$SSH_KEY_TMP"
+  cp "$SSH_KEY_FILE" "$SSH_KEY_TMP"
+  if ! ssh-keygen -p -N "" -f "$SSH_KEY_TMP"; then
+    rm -f "$SSH_KEY_TMP"
+    echo "Error: failed to decrypt SSH key" >&2
+    exit 1
+  fi
+  SSH_KEY_FILE="$SSH_KEY_TMP"
+fi
+
 echo "[preview] Command: ${COMMAND}"
 echo "[preview] Project: ${CI_PROJECT_NAME}"
 echo "[preview] Branch: ${CI_COMMIT_REF_NAME}"
@@ -131,9 +147,8 @@ if [ "$COMMAND" = "import-db" ]; then
   fi
 fi
 
-# Ensure temp file is removed even on error
-[ -n "$IMPORT_TMP" ] && [[ "$IMPORT_TMP" == .preview-import-* ]] \
-  && trap 'rm -f "$IMPORT_TMP"' EXIT
+# Ensure temp files are removed even on error
+trap 'rm -f "${IMPORT_TMP:-}" "${SSH_KEY_TMP:-}"' EXIT
 
 # ── run via Docker ────────────────────────────────────────────────────────────
 DOCKER_ARGS=(
