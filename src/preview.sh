@@ -5,11 +5,12 @@
 # Run from your project root (the directory containing .ddev/).
 #
 # Usage:
-#   preview.sh [deploy|delete|stop|import-db|export-db] [<slug>]
+#   preview.sh [deploy|delete|stop|restart|import-db|export-db] [<slug>]
 #
 #   deploy      — rsync and configure the preview environment
 #   delete      — tear down the preview environment (aliases: teardown)
 #   stop        — stop containers without removing data (aliases: shutdown)
+#   restart     — restart containers without removing data (aliases: reboot)
 #   import-db   — import a SQL dump into the preview database
 #                   cat database.sql    | preview.sh import-db
 #                   zcat database.sql.gz | preview.sh import-db
@@ -46,15 +47,16 @@ IMAGE="ghcr.io/mayfly-live/mayfly:latest"
 
 # ── validate and normalise command ───────────────────────────────────────────
 case "$COMMAND" in
-  deploy|delete|teardown|stop|shutdown|import-db|export-db) ;;
+  deploy|delete|teardown|stop|shutdown|restart|reboot|import-db|export-db) ;;
   *)
-    echo "Usage: $0 [deploy|delete|stop|import-db|export-db] [<slug>]" >&2
+    echo "Usage: $0 [deploy|delete|stop|restart|import-db|export-db] [<slug>]" >&2
     exit 1
     ;;
 esac
 case "$COMMAND" in
   teardown) COMMAND=delete ;;
   shutdown) COMMAND=stop ;;
+  reboot)   COMMAND=restart ;;
 esac
 
 if [ -n "$SLUG_OVERRIDE" ] && [ "$COMMAND" = "deploy" ]; then
