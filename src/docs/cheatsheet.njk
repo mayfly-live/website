@@ -26,19 +26,19 @@ permalink: /docs/cheatsheet.html
 	{% include "partials/code.njk" %}
 
 	<h3>Stopping a preview</h3>
-	<p>Stop containers without removing data (alias: `shutdown`).</p>
+	<p>Stop containers without removing data (alias: <code>shutdown</code>).</p>
 
 	{% set code = 'bash <(curl -fsSL mayfly.live/preview.sh) stop' %}
 	{% include "partials/code.njk" %}
 
 	<h3>Restarting</h3>
-	<p>Restart your preview container (alias: `reboot`).</p>
+	<p>Restart your preview container (alias: <code>reboot</code>).</p>
 
 	{% set code = 'bash <(curl -fsSL mayfly.live/preview.sh) restart' %}
 	{% include "partials/code.njk" %}
 
 	<h3>Deleting a container</h3>
-	<p>Tear down (and delete) your preview environment (alias: `teardown`).</p>
+	<p>Tear down (and delete) your preview environment (alias: <code>teardown</code>).</p>
 
 	{% set code = 'bash <(curl -fsSL mayfly.live/preview.sh) delete' %}
 	{% include "partials/code.njk" %}
