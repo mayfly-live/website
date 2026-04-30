@@ -1,0 +1,102 @@
+---
+layout: docs.njk
+title: Command Cheatsheet — Mayfly Docs
+navSection: Cheatsheet
+permalink: /docs/cheatsheet.html
+---
+
+<div class="content-inner">
+
+	<div class="page-meta">Reference</div>
+	<h1>Mayfly command cheatsheet</h1>
+	<p class="lead">A list of commands available with Mayfly.</p>
+
+	<h2>Container operations</h2>
+
+	<h3>Deploying</h3>
+	<p>Run to deploy your code to Mayfly.</p>
+
+	{% set code = 'bash <(curl -fsSL mayfly.live/preview.sh)' %}
+	{% include "partials/code.njk" %}
+
+	<h3>Updating code</h3>
+	<p>Run the same command to sync up any code changes.</p>
+
+	{% set code = 'bash <(curl -fsSL mayfly.live/preview.sh)' %}
+	{% include "partials/code.njk" %}
+
+	<h3>Stopping a preview</h3>
+	<p>Stop containers without removing data (alias: `shutdown`).</p>
+
+	{% set code = 'bash <(curl -fsSL mayfly.live/preview.sh) stop' %}
+	{% include "partials/code.njk" %}
+
+	<h3>Restarting</h3>
+	<p>Restart your preview container (alias: `reboot`).</p>
+
+	{% set code = 'bash <(curl -fsSL mayfly.live/preview.sh) restart' %}
+	{% include "partials/code.njk" %}
+
+	<h3>Deleting a container</h3>
+	<p>Tear down (and delete) your preview environment (alias: `teardown`).</p>
+
+	{% set code = 'bash <(curl -fsSL mayfly.live/preview.sh) delete' %}
+	{% include "partials/code.njk" %}
+
+	<h2>Database operations</h2>
+
+	<h3>Import a database</h3>
+	<p>Import a database using stdin.</p>
+
+	{% set code = 'cat dump.sql | bash <(curl -fsSL host.mayfly.live/preview.sh) import-db' %}
+	{% include "partials/code.njk" %}
+
+	<p>Import SQL from file (plain or gzipped).</p>
+
+	{% set code = 'DB_FILE=dump.sql.gz bash <(curl -fsSL host.mayfly.live/preview.sh) import-db' %}
+	{% include "partials/code.njk" %}
+
+	<h3>Export a database</h3>
+	<p>Export database to stdout.</p>
+
+	{% set code = 'bash <(curl -fsSL host.mayfly.live/preview.sh) export-db > dump.sql' %}
+	{% include "partials/code.njk" %}
+
+	<p>Export database to file.</p>
+
+	{% set code = 'DB_FILE=dump.sql bash <(curl -fsSL host.mayfly.live/preview.sh) export-db' %}
+	{% include "partials/code.njk" %}
+
+	<h2>SSH Operations</h2>
+
+	<h3>Access preview</h3>
+	<p>Allows SSH access to the preview web container.</p>
+
+	{% set code = 'ssh deploy@host.mayfly.live <slug>' %}
+	{% include "partials/code.njk" %}
+
+	<h3>List previews</h3>
+	<p>List which previews are currently associated with your account.</p>
+
+	{% set code = 'ssh deploy@host.mayfly.live' %}
+	{% include "partials/code.njk" %}
+
+	<h3>View username</h3>
+	<p>View the username currently associated with your SSH key.</p>
+
+	{% set code = 'ssh deploy@host.mayfly.live whoami' %}
+	{% include "partials/code.njk" %}
+
+	<h3>Calculate the slug</h3>
+	<p>Useful if you need to anticipate what the slug is.</p>
+
+	{% set code = 'ssh deploy@host.mayfly.live slug <ddev_name> <branch>' %}
+	{% include "partials/code.njk" %}
+
+	<h3>View global rsync excludes</h3>
+	<p>View which excludes are set globally on your account.</p>
+
+	{% set code = 'ssh deploy@host.mayfly.live rsync-excludes' %}
+	{% include "partials/code.njk" %}
+
+</div>
