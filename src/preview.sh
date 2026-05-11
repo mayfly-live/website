@@ -172,6 +172,19 @@ fi
 # Ensure temp files are removed even on error
 trap 'rm -f "${IMPORT_TMP:-}" "${SSH_KEY_TMP:-}"' EXIT
 
+# ── fast path: direct slug + simple command ──────────────────────────────────
+# Bypass Docker for delete/stop/restart when a slug is explicitly provided.
+# This avoids any dependency on the Docker image having an up-to-date get_slug.
+if [ -n "$SLUG_OVERRIDE" ] && [[ "$COMMAND" =~ ^(delete|stop|restart)$ ]]; then
+  eval "$(ssh-agent -s)" > /dev/null
+  trap 'ssh-agent -k > /dev/null 2>&1; rm -f "${IMPORT_TMP:-}" "${SSH_KEY_TMP:-}"' EXIT
+  ssh-add "$SSH_KEY_FILE" 2>/dev/null
+  ssh -o StrictHostKeyChecking=accept-new \
+    "${PREVIEW_SERVER_USER}@${PREVIEW_SERVER_HOST}" \
+    "bash /opt/preview-scripts/${COMMAND}-preview.sh ${SLUG_OVERRIDE}"
+  exit $?
+fi
+
 # ── run via Docker ────────────────────────────────────────────────────────────
 DOCKER_ARGS=(
   --rm
