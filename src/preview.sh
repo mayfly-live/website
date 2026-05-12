@@ -69,6 +69,74 @@ PREVIEW_SERVER_HOST=${PREVIEW_SERVER_HOST:-host.mayfly.live}
 PREVIEW_SERVER_USER=${PREVIEW_SERVER_USER:-deploy}
 PREVIEW_DOMAIN=${PREVIEW_DOMAIN:-mayfly.live}
 
+# ── global preferences ───────────────────────────────────────────────────────
+MAYFLY_CONFIG="${HOME}/.mayfly"
+
+prompt_upload_warning() {
+  local project_name="$1"
+
+  # Check global opt-out
+  if [ -f "$MAYFLY_CONFIG" ] && grep -qxF "upload_warning_always_accept=true" "$MAYFLY_CONFIG" 2>/dev/null; then
+    return 0
+  fi
+
+  # Check per-project opt-out
+  if [ -n "$project_name" ] && [ -f "$MAYFLY_CONFIG" ] && \
+     grep -qxF "upload_warning_accepted_project=${project_name}" "$MAYFLY_CONFIG" 2>/dev/null; then
+    return 0
+  fi
+
+  # Non-interactive fallback — just print a reminder and continue
+  if [ ! -t 0 ]; then
+    echo "[preview] NOTICE: Project files will be uploaded to a public server — ensure no sensitive data is included" >&2
+    return 0
+  fi
+
+  echo ""
+  echo "  ! WARNING: Public upload"
+  echo "  -------------------------"
+  echo "  Your project files will be uploaded to a public preview server."
+  echo ""
+  echo "  Please ensure:"
+  echo "    - No sensitive data is included (passwords, API keys, .env files, etc.)"
+  echo "    - Consider password-protecting your preview site"
+  echo ""
+  printf "  n  Cancel\n"
+  printf "  y  Proceed\n"
+  printf "  p  Proceed, and don't ask again for project '%s'\n" "$project_name"
+  printf "  a  Proceed, and don't ask again for any project\n"
+  echo ""
+
+  while true; do
+    printf "  Choice [n/y/p/a]: "
+    read -r choice
+    case "$choice" in
+      n|N|"")
+        echo "[preview] Deployment cancelled."
+        exit 0
+        ;;
+      y|Y)
+        break
+        ;;
+      p|P)
+        [ ! -f "$MAYFLY_CONFIG" ] && printf '# mayfly preferences\n' > "$MAYFLY_CONFIG"
+        printf 'upload_warning_accepted_project=%s\n' "$project_name" >> "$MAYFLY_CONFIG"
+        echo "[preview] Saved: warning suppressed for project '${project_name}'"
+        break
+        ;;
+      a|A)
+        [ ! -f "$MAYFLY_CONFIG" ] && printf '# mayfly preferences\n' > "$MAYFLY_CONFIG"
+        printf 'upload_warning_always_accept=true\n' >> "$MAYFLY_CONFIG"
+        echo "[preview] Saved: warning suppressed for all projects"
+        break
+        ;;
+      *)
+        echo "  Please enter n, y, p, or a"
+        ;;
+    esac
+  done
+}
+
 # ── project name and branch ──────────────────────────────────────────────────
 # Skipped when a slug is passed directly (non-deploy commands only).
 CI_PROJECT_NAME=""
@@ -89,6 +157,11 @@ if [ -z "$SLUG_OVERRIDE" ]; then
     echo "Error: could not determine current git branch" >&2
     exit 1
   fi
+fi
+
+# ── upload warning (deploy only) ─────────────────────────────────────────────
+if [ "$COMMAND" = "deploy" ]; then
+  prompt_upload_warning "$CI_PROJECT_NAME"
 fi
 
 # ── SSH key ──────────────────────────────────────────────────────────────────
